@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Blog Ana Sayfa{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-5">Blog Yazıları</h1>
+
+        <div class="row">
+            {% for post in posts %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        {% if post.coverImage %}
+                            <img src="{{ asset('uploads/images/' ~ post.coverImage) }}" class="card-img-top" alt="{{ post.title }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-secondary text-white d-flex justify-content-center align-items-center" style="height: 200px;">
+                                Resim Yok
+                            </div>
+                        {% endif %}
+
+                        <div class="card-body">
+                            {% if post.category %}
+                                <span class="badge bg-primary mb-2">{{ post.category.name }}</span>
+                            {% endif %}
+
+                            <h5 class="card-title">{{ post.title }}</h5>
+                            <p class="card-text text-muted">
+                                {{ post.content|striptags|slice(0, 100) }}...
+                            </p>
+                            <a href="{{ path('blog_detail', {id: post.id}) }}" class="btn btn-sm btn-outline-dark">Devamını Oku</a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-warning w-100 text-center">
+                    Henüz hiç yazı eklenmemiş.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

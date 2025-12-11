@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+
+                <a href="{{ path('app_home') }}" class="btn btn-outline-secondary mb-4">
+                    <i class="fas fa-arrow-left"></i> Ana Sayfaya Dön
+                </a>
+
+                <article class="mb-5">
+                    <h1 class="fw-bold mb-3">{{ post.title }}</h1>
+
+                    <div class="text-muted mb-4 border-bottom pb-3">
+                        {% if post.category %}
+                            <span class="badge bg-primary me-2">{{ post.category.name }}</span>
+                        {% endif %}
+                        <span><i class="far fa-clock"></i> {{ post.publishedAt|date("d.m.Y") }}</span>
+                    </div>
+
+                    {% if post.coverImage %}
+                        <img
+                            src="{{ asset('uploads/images/' ~ post.coverImage) }}"
+                            class="img-fluid rounded shadow-sm mb-4 w-100"
+                            alt="{{ post.title }}"
+                            style="height: 400px; object-fit: cover;"
+                        >
+                    {% endif %}
+
+                    <div class="blog-content fs-5 lh-lg">
+                        {{ post.content|raw }}
+                    </div>
+                </article>
+
+                <section class="comments-area bg-light p-4 rounded mt-5">
+                    <h3 class="mb-4">Yorumlar ({{ post.comments|length }})</h3>
+
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    <div class="old-comments mb-5">
+                        {% for comment in post.comments %}
+                            <div class="card mb-3 border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <h6 class="fw-bold text-primary">{{ comment.author }}</h6>
+                                        <small class="text-muted">{{ comment.createdAt|date("d.m.Y H:i") }}</small>
+                                    </div>
+                                    <p class="card-text mt-2">{{ comment.content }}</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                Henüz hiç yorum yapılmamış. İlk yorumu sen yap!
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="new-comment-form">
+                        <h5 class="mb-3">Bir Yorum Bırak</h5>
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                {{ form_start(commentForm) }}
+                                <div class="mb-3">
+                                    {{ form_label(commentForm.author, 'Adınız Soyadınız', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(commentForm.author, {'attr': {'class': 'form-control', 'placeholder': 'Adınızı yazın...'}}) }}
+                                </div>
+                                <div class="mb-3">
+                                    {{ form_label(commentForm.content, 'Yorumunuz', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(commentForm.content, {'attr': {'class': 'form-control', 'rows': '4', 'placeholder': 'Yorumunuzu buraya yazın...'}}) }}
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-paper-plane"></i> Yorumu Gönder
+                                </button>
+                                {{ form_end(commentForm) }}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
