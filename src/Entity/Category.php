@@ -6,8 +6,10 @@ use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Category
 {
     #[ORM\Id]
@@ -18,7 +20,7 @@ class Category
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $slug = null;
 
     /**
@@ -54,7 +56,7 @@ class Category
         return $this->slug;
     }
 
-    public function setSlug(string $slug): static
+    public function setSlug(?string $slug): static
     {
         $this->slug = $slug;
 
@@ -94,5 +96,17 @@ class Category
     public function __toString(): string
     {
         return $this->name;
+    }
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function computeSlug(): void
+    {
+        // Slug boşsa, kategori isminden üret
+        if (!$this->slug || $this->slug === '-') {
+            $slugger = new AsciiSlugger();
+            // İsim: "Yazılım Dünyası" -> Slug: "yazilim-dunyasi"
+            $this->slug = strtolower($slugger->slug((string) $this->name));
+        }
     }
 }

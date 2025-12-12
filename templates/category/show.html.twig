@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ category.name }} - Blog Yazıları{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="row">
+
+            <div class="col-12 text-center mb-5">
+                <h1 class="display-4 fw-bold">{{ category.name }}</h1>
+                <p class="lead text-muted">Bu kategoride toplam {{ posts|length }} yazı var.</p>
+
+                <div class="dropdown d-inline-block mt-2">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-sort me-1"></i>
+                        Sıralama:
+                        {% if currentSort == 'eski' %} En Eski
+                        {% elseif currentSort == 'az' %} A'dan Z'ye
+                        {% elseif currentSort == 'za' %} Z'den A'ya
+                        {% else %} En Yeni
+                        {% endif %}
+                    </button>
+
+                    <ul class="dropdown-menu" data-turbo="false">
+                        <li><a class="dropdown-item" href="?sirala=yeni">En Yeni (Varsayılan)</a></li>
+                        <li><a class="dropdown-item" href="?sirala=eski">En Eski</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="?sirala=az">Başlık (A-Z)</a></li>
+                        <li><a class="dropdown-item" href="?sirala=za">Başlık (Z-A)</a></li>
+                    </ul>
+                </div>
+                <hr class="w-25 mx-auto mt-4">
+            </div>
+
+            {% for post in posts %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+
+                        {% if post.coverImage %}
+                            <img src="/uploads/images/{{ post.coverImage }}" class="card-img-top" alt="{{ post.title }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <span>Resim Yok</span>
+                            </div>
+                        {% endif %}
+
+                        <div class="card-body">
+                            <span class="badge bg-primary mb-2">{{ category.name }}</span>
+
+                            <h5 class="card-title">{{ post.title }}</h5>
+                            <p class="card-text text-muted">{{ post.content|striptags|slice(0, 100) }}...</p>
+
+                            <a href="{{ path('blog_detail', {slug: post.slug}) }}" class="btn btn-outline-primary btn-sm">Devamını Oku</a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12 text-center">
+                    <div class="alert alert-warning">
+                        Bu kategoride henüz hiç yazı yok.
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+{% endblock %}

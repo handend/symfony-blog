@@ -20,24 +20,31 @@ class BlogPostCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        // 1. Yazı Başlığı
+        // 1. Başlık
         yield TextField::new('title', 'Başlık');
 
-        // 2. Kategori Seçimi (Senin "Yes" dediğin ilişki burada devreye giriyor)
+        // 2. Slug (URL) - İşte burası görünümü yönetiyor
+        yield TextField::new('slug', 'URL Uzantısı')
+            ->setRequired(false)     // Zorunlu değil (Boş bırakılabilir)
+            ->hideWhenCreating();    // YENİ EKLEME sayfasında GİZLE
+
+        // 3. Kategori
         yield AssociationField::new('category', 'Kategori');
 
-        // 3. İçerik (Zengin Metin Editörü)
+        // 4. İçerik
         yield TextEditorField::new('content', 'İçerik')->hideOnIndex();
 
-        // 4. Resim Yükleme Ayarları
+        // 5. Kapak Resmi
         yield ImageField::new('coverImage', 'Kapak Resmi')
-            ->setBasePath('uploads/images')      // Resimlerin tarayıcıda görüneceği yol prefix'i
-            ->setUploadDir('public/uploads/images') // Resimlerin sunucuda yükleneceği fiziksel klasör
-            ->setUploadedFileNamePattern('[randomhash].[extension]') // Dosya adını şifrele (aynı isimli dosyalar çakışmasın)
-            ->setRequired(false); // Resim yüklemek zorunlu olmasın
+            ->setBasePath('uploads/images')
+            ->setUploadDir('public/uploads/images')
+            ->setUploadedFileNamePattern('[randomhash].[extension]')
+            ->setRequired(false);
 
-        // 5. Tarih ve Durum
+        // 6. Tarih
         yield DateTimeField::new('publishedAt', 'Yayın Tarihi');
         yield BooleanField::new('isPublished', 'Yayında');
     }
+
+
 }

@@ -7,8 +7,10 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
 #[ORM\Entity(repositoryClass: BlogPostRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class BlogPost
 {
     #[ORM\Id]
@@ -34,10 +36,13 @@ class BlogPost
     #[ORM\Column(nullable: true)]
     private ?bool $isPublished = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $slug = null;
+
     /**
      * @var Collection<int, Comment>
      */
-    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'post', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'blogPost', orphanRemoval: true)]
     private Collection $comments;
 
     public function __construct()
@@ -122,24 +127,6 @@ class BlogPost
         return $this;
     }
 
-    /**
-     * @return Collection<int, Comment>
-     */
-    public function getComments(): Collection
-    {
-        return $this->comments;
-    }
-
-    public function addComment(Comment $comment): static
-    {
-        if (!$this->comments->contains($comment)) {
-            $this->comments->add($comment);
-            $comment->setPost($this);
-        }
-
-        return $this;
-    }
-
     public function removeComment(Comment $comment): static
     {
         if ($this->comments->removeElement($comment)) {
@@ -155,5 +142,46 @@ class BlogPost
     public function __toString(): string
     {
         return $this->title; // Bu nesne çağrıldığında "Başlığını" ver.
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(?string $slug): static
+    {
+        $this->slug = $slug;
+        return $this;
+    }
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function computeSlug(): void
+    {
+        // Eğer slug boşsa veya tire ise, başlıktan üret
+        if (!$this->slug || $this->slug === '-') {
+            $slugger = new AsciiSlugger();
+            // Başlık: "Symfony Dersleri" -> Slug: "symfony-dersleri"
+            $this->slug = strtolower($slugger->slug((string) $this->title));
+        }
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setBlogPost($this);
+        }
+
+        return $this;
     }
 }

@@ -14,9 +14,6 @@ class Comment
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $author = null;
-
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
 
@@ -25,23 +22,18 @@ class Comment
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?BlogPost $post = null;
+    private ?User $author = null;
+
+    #[ORM\ManyToOne(inversedBy: 'comments')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?BlogPost $blogPost = null;
+
+    #[ORM\Column]
+    private ?bool $isPublished = null;
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getAuthor(): ?string
-    {
-        return $this->author;
-    }
-
-    public function setAuthor(string $author): static
-    {
-        $this->author = $author;
-
-        return $this;
     }
 
     public function getContent(): ?string
@@ -68,14 +60,39 @@ class Comment
         return $this;
     }
 
-    public function getPost(): ?BlogPost
+
+    public function getAuthor(): ?User
     {
-        return $this->post;
+        return $this->author;
     }
 
-    public function setPost(?BlogPost $post): static
+    public function setAuthor(?User $author): static
     {
-        $this->post = $post;
+        $this->author = $author;
+
+        return $this;
+    }
+
+    public function getBlogPost(): ?BlogPost
+    {
+        return $this->blogPost;
+    }
+
+    public function setBlogPost(?BlogPost $blogPost): static
+    {
+        $this->blogPost = $blogPost;
+
+        return $this;
+    }
+
+    public function isPublished(): ?bool
+    {
+        return $this->isPublished;
+    }
+
+    public function setIsPublished(bool $isPublished): static
+    {
+        $this->isPublished = $isPublished;
 
         return $this;
     }

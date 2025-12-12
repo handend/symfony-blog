@@ -14,15 +14,16 @@ class CommentType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('author', null, [
-                'label' => 'Adınız Soyadınız',
-                'attr' => ['class' => 'form-control mb-3']
-            ])
             ->add('content', null, [
                 'label' => 'Yorumunuz',
-                'attr' => ['class' => 'form-control mb-3', 'rows' => 5]
+                'attr' => [
+                    'class' => 'form-control',
+                    'rows' => 4,
+                    'placeholder' => 'Düşüncelerinizi buraya yazın...'
+                ],
             ])
-            // createdAt ve post alanlarını buradan SİLDİK.
+            // isPublished, createdAt, author, blogPost alanlarını SİLDİK.
+            // Onları Controller'da biz otomatik dolduracağız.
         ;
     }
 

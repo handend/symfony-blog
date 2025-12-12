@@ -20,14 +20,16 @@
 
                         <div class="card-body">
                             {% if post.category %}
-                                <span class="badge bg-primary mb-2">{{ post.category.name }}</span>
+                                <a href="{{ path('app_category_show', {slug: post.category.slug}) }}" class="badge bg-secondary text-decoration-none mb-2">
+                                    {{ post.category.name }}
+                                </a>
                             {% endif %}
 
                             <h5 class="card-title">{{ post.title }}</h5>
                             <p class="card-text text-muted">
                                 {{ post.content|striptags|slice(0, 100) }}...
                             </p>
-                            <a href="{{ path('blog_detail', {id: post.id}) }}" class="btn btn-sm btn-outline-dark">Devamını Oku</a>
+                            <a href="{{ path('blog_detail', {slug: post.slug}) }}" class="btn btn-sm btn-outline-dark">Devamını Oku</a>
                         </div>
                     </div>
                 </div>

@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route; // <-- Bak burası Attribute oldu
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 
 class HomeController extends AbstractController
 {
@@ -28,38 +29,46 @@ class HomeController extends AbstractController
         ]);
     }
 
-    #[Route('/yazi/{id}', name: 'blog_detail')]
-    public function show(BlogPost $post, Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/blog/{slug}', name: 'blog_detail')]
+    public function show(
+        #[MapEntity(mapping: ['slug' => 'slug'])] BlogPost $post,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response
     {
-        // 1. Yazı yayında değilse gösterme (Güvenlik)
-        if (!$post->isPublished()) {
-            throw $this->createNotFoundException('Yazı bulunamadı.');
-        }
+        // 1. Yorum Nesnesi ve Formu Oluştur
+        $comment = new \App\Entity\Comment();
+        $form = $this->createForm(\App\Form\CommentType::class, $comment);
 
-        // 2. Yorum Formunu Hazırla
-        $comment = new Comment();
-        $form = $this->createForm(CommentType::class, $comment);
-
-        // 3. Form gönderildi mi diye kontrol et
+        // 2. Form isteğini yakala
         $form->handleRequest($request);
 
+        // 3. Eğer form gönderildiyse ve geçerliyse
         if ($form->isSubmitted() && $form->isValid()) {
-            $comment->setPost($post); // Yorumu bu yazıya bağla
-            $comment->setCreatedAt(new \DateTimeImmutable()); // Şu anki saati ekle
 
-            // Veritabanına kaydet
+            // Eğer kullanıcı giriş yapmamışsa yorum yapamasın (Güvenlik)
+            if (!$this->getUser()) {
+                $this->addFlash('error', 'Yorum yapmak için giriş yapmalısınız.');
+                return $this->redirectToRoute('app_login');
+            }
+
+            $comment->setAuthor($this->getUser()); // Yazan kişi: Şu anki kullanıcı
+            $comment->setBlogPost($post);          // Hangi yazıya yazıldı?
+            $comment->setCreatedAt(new \DateTimeImmutable()); // Ne zaman?
+            $comment->setIsPublished(true); // Direkt yayınlansın mı? (Admin onayı istersen false yap)
+
             $entityManager->persist($comment);
             $entityManager->flush();
 
-            // Başarı mesajı ver ve sayfayı yenile
             $this->addFlash('success', 'Yorumunuz başarıyla gönderildi!');
-            return $this->redirectToRoute('blog_detail', ['id' => $post->getId()]);
+
+            // Sayfayı yenile (Formun tekrar gönderilmesini önler)
+            return $this->redirectToRoute('blog_detail', ['slug' => $post->getSlug()]);
         }
 
-        // 4. Sayfayı göster (Hem yazıyı hem formu gönderiyoruz)
         return $this->render('home/show.html.twig', [
             'post' => $post,
-            'commentForm' => $form->createView(),
+            'commentForm' => $form->createView(), // Formu görünüme gönderiyoruz
         ]);
     }
 }

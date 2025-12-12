@@ -25,4 +25,17 @@ class CategoryCrudController extends AbstractCrudController
         ];
     }
     */
+
+    public function configureFields(string $pageName): iterable
+    {
+        return [
+            TextField::new('name', 'Kategori Adı'),
+
+            // Slug Ayarları:
+            TextField::new('slug')
+                ->setRequired(false) // 1. Zorunlu olma (Boş kaydetmeye izin ver)
+                ->hideWhenCreating() // 2. Yeni eklerken gösterme (Kafa karıştırmasın)
+                ->setHelp('Otomatik oluşturulur, isterseniz değiştirebilirsiniz.'),
+        ];
+    }
 }

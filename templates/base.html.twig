@@ -18,7 +18,54 @@
 </head>
 <body>
 
-<div class="container mt-3">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{{ path('app_home') }}">
+            <i class="fas fa-rocket me-2"></i>Roc Blog
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_home') }}">Ana Sayfa</a>
+                </li>
+
+                {% if app.user %}
+
+                    {% if 'ROLE_ADMIN' in app.user.roles %}
+                        <li class="nav-item">
+                            <a class="nav-link text-warning fw-bold" href="/admin">
+                                <i class="fas fa-crown"></i> Admin Paneli
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="nav-item ms-3 d-flex align-items-center">
+                        <span class="text-white-50 small me-3">Merhaba, {{ app.user.email }}</span>
+                        <a class="btn btn-sm btn-outline-danger" href="{{ path('app_logout') }}">
+                            <i class="fas fa-sign-out-alt"></i> Çıkış
+                        </a>
+                    </li>
+
+                {% else %}
+                    <li class="nav-item ms-2">
+                        <a class="nav-link" href="{{ path('app_login') }}">Giriş Yap</a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-sm btn-primary" href="{{ path('app_register') }}">Kayıt Ol</a>
+                    </li>
+                {% endif %}
+
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container">
     {% for label, messages in app.flashes %}
         {% for message in messages %}
             <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show" role="alert">
